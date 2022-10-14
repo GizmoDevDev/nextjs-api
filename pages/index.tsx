@@ -1,10 +1,20 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
-import { persons } from '../data/persons'
 import {PersonCard} from "../src/components/PersonCard/PersonCard";
+import {useEffect, useState} from "react";
+import {Person} from "../src/types/Person";
 
 const Home: NextPage = () => {
+  const [persons, setPersons] = useState<Person[]>()
+  useEffect(function fetchPerson() {
+     fetch('/api/persons')
+       .then(async (data) => {
+         setPersons(await data.json())
+       })
+       .catch(() => setPersons([]))
+  }, [])
+
   return (
     <div className={styles.container}>
       <Head>
@@ -15,9 +25,12 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h3>Star Wars persons</h3>
-        <div className={styles['person-container']}>
-          {persons.map(({name, id, img}) => <PersonCard name={name} img={img} key={id} />)}
-        </div>
+        {!persons?.length
+          ? <>Loading...</>
+          : <div className={styles['person-container']}>
+            {persons.map(({name, id, img}) => <PersonCard name={name} img={img} key={id}/>)}
+          </div>
+        }
       </main>
     </div>
   )
